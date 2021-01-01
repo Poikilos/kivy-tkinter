@@ -1,5 +1,9 @@
 #!/usr/bin/env python
+
 class App:
-class App:
+    
     def run(self):
+        raise NotImplementedError
+        
     def build(self):
+        raise NotImplementedError
