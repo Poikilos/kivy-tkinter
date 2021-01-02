@@ -10,9 +10,5 @@ except ImportError:  # Python 2
     import ttk
 
 
-class Image:
-    raise NotImplementedError
-
-
-class CoreImage:
-    raise NotImplementedError
+class Label(tk.Label):
+    pass
