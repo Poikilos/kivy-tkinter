@@ -9,17 +9,54 @@ except ImportError:  # Python 2
     import tkFont
     import ttk
 
-from kivy.app import App
-from kivy.uix import Widget
 
-class BoxLayout(tk.Frame, Widget):
-    
+__all__ = ('BoxLayout', )
+
+from kivy.kivytkinter import APP
+from kivy.uix.layout import Layout
+
+class BoxLayout(ttk.Frame, Layout):
+
     def __init__(self, **kwargs):
+        Layout.__init__(self, **kwargs)
+        # super(BoxLayout, self).__init__(**kwargs)
+        # TODO: implement spacing, padding, children, orientation,
+        # parent, size, pos
         self.gm = "grid"  # which Tkinter geometry manager to use
-        self.orientation = kwargs.get("orientation", "horizontal")
         self.layoutI = 0
-        if kwargs.has_key("orientation"):
-            del kwargs["orientation"]
-        tk.Frame().__init__(App.ROOT, **kwargs)
 
-    
+        self.orientation = kwargs.get("orientation", "horizontal")
+        if "orientation" in kwargs:
+            del kwargs["orientation"]
+
+        ttk.Frame.__init__(self, self.parent)
+        print("The parent of a BoxLayout is {}".format(self.parent))
+
+    def add_widget(self, widget, index=0, canvas=None):
+        # TODO: implement pos_hint
+        pre = "[BoxLayout add_widget] "
+        if index != 0:
+            warn(pre + "index is not implemented.")
+        if canvas is not None:
+            warn(pre + "canvas is not implemented.")
+        if not hasattr(self, 'gm'):
+            raise AttributeError("The BoxLayout must define a"
+                                 " Tkinter geometry manager.")
+        if self.gm == "grid":
+            print("+adding a {} to a {}..."
+                  "".format(type(widget).__name__,
+                            type(self).__name__))
+            widget.atI = self.layoutI
+            if self.orientation == "horizontal":
+                widget.grid(column=self.layoutI, row=0,
+                            sticky=tk.N+tk.S)
+            elif self.orientation == "vertical":
+                widget.grid(column=0, row=self.layoutI,
+                            sticky=tk.W+tk.E)
+            else:
+                raise ValueError("Unknown Kivy orientation: {}"
+                                 "".format(self.orientation))
+            self.layoutI += 1
+        else:
+            raise ValueError("A Tkinter geometry manager named {} is"
+                             " not implemented.".format(self.gm))

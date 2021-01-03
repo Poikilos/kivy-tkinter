@@ -10,25 +10,39 @@ except ImportError:  # Python 2
     import ttk
 
 
-class StringProperty:
-    raise NotImplementedError
+class DictProperty:
 
+    def __init__(self, *args):
+        if len(args) == 1:
+            for k,v in args[0].items():
+                self[k] = v
+        elif len(args) > 1:
+            raise ValueError("Only 0-1 arguments are implemented for"
+                             " DictProperty.")
 
-class ObjectProperty:
-    raise NotImplementedError
+    def __setitem__(self, key, item):
+        self.__dict__[key] = item
 
-
-class Clock:
-    raise NotImplementedError
-
-
-class Logger:
-    raise NotImplementedError
+    def __getitem__(self, key):
+        return self.__dict__[key]
 
 
 class ListProperty:
-    raise NotImplementedError
+    def __init__(self, *args):
+        raise NotImplementedError
 
 
 class NumericProperty:
-    raise NotImplementedError
+    def __init__(self, *args):
+        raise NotImplementedError
+
+
+class ObjectProperty:
+    def __init__(self, *args):
+        raise NotImplementedError
+
+
+class StringProperty:
+    def __init__(self, *args):
+        raise NotImplementedError
+

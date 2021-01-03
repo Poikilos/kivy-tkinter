@@ -9,6 +9,11 @@ except ImportError:  # Python 2
     import tkFont
     import ttk
 
+from kivy.uix.label import Label
 
-class Button(tk.Button):
-    raise NotImplementedError
+class Button(ttk.Button, Label):
+
+    def __init__(self, **kwargs):
+        Label.__init__(self, **kwargs)
+        ttk.Button.__init__(self, self.parent)
+        print("The parent of a Button is {}".format(self.parent))

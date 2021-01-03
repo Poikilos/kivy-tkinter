@@ -9,11 +9,13 @@ except ImportError:  # Python 2
     import tkFont
     import ttk
 
+__all__ = ('Layout', )
+
 from kivy.uix.widget import Widget
 
-class Label(ttk.Label, Widget):
+
+class Layout(Widget):
 
     def __init__(self, **kwargs):
         Widget.__init__(self, **kwargs)
-        ttk.Label.__init__(self, self.parent)
-        print("The parent of a Label is {}".format(self.parent))
+        print("(The parent of a Layout is {})".format(self.parent))
