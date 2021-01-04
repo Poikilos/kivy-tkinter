@@ -50,3 +50,9 @@ apps include:
 
 #### After (kivy-tkinter)
 ![IntroCompatiblizer after](doc/images/IntroCompatiblizer-after.png)
+
+
+## Links
+- [kivy-tkinter on Reddit](https://www.reddit.com/r/kivy/comments/kqh0gl/kivytkinter_a_wip_compatibility_layer_to_run_kivy/)
+- [kivy-tkinter on kivy-users](https://groups.google.com/g/kivy-users/c/um19B__0ArU) (Google groups)
+- [poikilos.org](https://poikilos.org) dev blog
