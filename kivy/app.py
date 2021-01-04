@@ -87,6 +87,11 @@ class App(tk.Tk):
         if KT.FORM is not None:
             raise RuntimeError("kivy-tkinter built twice!")
         self.frame.pack(fill=tk.BOTH, expand=True)
+
+        #self.frame.grid(row=0, column=0, sticky=tk.NSEW)
+        #tk.Grid.rowconfigure(KT.APP, 0, weight=1)
+        #tk.Grid.columnconfigure(KT.APP, 0, weight=1)
+
         KT.FORM = self.frame
         # self.frame.grid()
         self.frame.parent = KT.APP
@@ -285,6 +290,8 @@ class App(tk.Tk):
                     print(dent + "tkinterParent is {}"
                           "".format(stack[-1]))
                     '''
+
+                    '''
                     msgFmt = (dent + "adding {}"
                               " to {} {} with orientation {}.")
                     print(
@@ -295,6 +302,7 @@ class App(tk.Tk):
                             stack[-1].orientation,
                         )
                     )
+                    '''
 
                     if not hasattr(stack[-1], 'add_widget'):
                         exFmt = (dent + "Line {} of {} has a `{}`"

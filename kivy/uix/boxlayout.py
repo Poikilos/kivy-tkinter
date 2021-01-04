@@ -71,19 +71,28 @@ class BoxLayout(ttk.Frame, Layout):
                             type(self).__name__))
             '''
             widget.atI = self._layoutI
+            row = None
+            column = None
             try:
                 if self.orientation == "horizontal":
-                    widget.grid(column=self._layoutI, row=0,
-                                sticky=tk.N+tk.S)
+                    row = 0
+                    column = self._layoutI
+                    widget.grid(column=column, row=row,
+                                sticky=tk.NSEW) # sticky=tk.N+tk.S)
                 elif self.orientation == "vertical":
-                    widget.grid(column=0, row=self._layoutI,
-                                sticky=tk.W+tk.E)
+                    row = self._layoutI
+                    column = 0
+                    widget.grid(column=column, row=row,
+                                sticky=tk.NSEW) # sticky=tk.W+tk.E)
                 else:
                     raise ValueError(
                         "Unknown Kivy orientation: {} '{}'"
                         "".format(type(self.orientation).__name__,
                                   self.orientation)
                     )
+                tk.Grid.rowconfigure(widget.parent, row, weight=1)
+                tk.Grid.columnconfigure(widget.parent, column, weight=1)
+                # ^ expand
                 widget._last_gm = 'grid'
             except tk.TclError as ex:
                 view_traceback()
