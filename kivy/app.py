@@ -21,7 +21,7 @@ from kivy.kivytkinter import warn
 from kivy.kivytkinter import view_traceback
 from kivy.properties import DictProperty
 
-from kivy.kivytkinter import APP
+from kivy.kivytkinter import KT
 # ^ this must be done from a dumb file that every file imports, because
 #   If files that app.py imports import App, a circular import will
 #   occur.
@@ -38,9 +38,9 @@ class App(tk.Tk):
 
     def __init__(self):
         tk.Tk.__init__(self)
-        title = str(type(self))
+        title = type(self).__name__
         if title.endswith("App"):
-            title(title[:-3])
+            title = title[:-3]
         self.title(title)
         self.minsize(32,32)
         # ^ Prevent weird tkinter behavior creating a 1px wide window
@@ -50,7 +50,7 @@ class App(tk.Tk):
     def run(self):
         self.parser = Parser(content=Builder._loadedStr)
         self._build()
-        APP.ROOT.mainloop()
+        KT.APP.mainloop()
 
     def load_kv(self, filename=None):
         appName = type(self).__name__
@@ -68,7 +68,7 @@ class App(tk.Tk):
         Construct the app from KV language lines if present. (Doing so
         here and now is likely not a Kivy-like way of doing things).
         '''
-        indent = ""
+        KT.indent = ""
         prevIndent = None
         self.ids = DictProperty({})
         stack = []
@@ -78,15 +78,15 @@ class App(tk.Tk):
         cf = os.path.split(cfp)[1]
         mod = importlib.import_module(os.path.splitext(cf)[0])
         # print("The file with custom widgets is \"{}\".".format(cfp))
-        APP.ROOT = self
+        KT.APP = self
         self.frame = self.build()
         # ^ Ok since kivy-tkinter widget constructors always set the
         #   parent to App.ROOT by default--so no matter how the client
         #   code creates the root widget, the parent will be `App.ROOT`.
         self.frame.pack(fill=tk.BOTH, expand=True)
         self.frame.parent = None
-        # ^ But technically, APP.ROOT is the root widget's
-        #   (APP.ROOT.frame's) parent
+        # ^ But technically, KT.APP is the root widget's
+        #   (KT.APP.frame's) parent
         lineN = 0
         fn = "KV in {}".format(os.path.split(cfp)[1])
         if self.parser.filename is not None:
@@ -102,7 +102,7 @@ class App(tk.Tk):
                 continue
             dent = line[:(len(line)-len(lineS))]
             # print("indent: \"{}\"".format(dent))
-            if len(dent) < len(indent):
+            if len(dent) < len(KT.indent):
                 if stack[-1].parent is None:
                     raise SyntaxError(dent + "Line {} of {} has more"
                                       " than one root widget near `{}`"
@@ -115,10 +115,13 @@ class App(tk.Tk):
                 del stack[-1]
                 print(dent + "Line {} of {} starts a new object"
                       " near `{}`.".format(lineN, fn, line.strip()))
-            indent = dent
+            KT.indent = dent
             kvc = Parser.parserStatement(lineS)
             deeperO = None
             ThisClass = None
+            # thisId = None
+            # thisOr = None
+            # methodName = None
             if kvc.lvalue.isCustomClass is True:
                 try:
                     ThisClass = getattr(mod, kvc.lvalue.className)
@@ -130,8 +133,8 @@ class App(tk.Tk):
                                       "".format(lineN, fn, cf,
                                                 line.strip()))
                 # deeperO = ThisClass()
-                print("Creating a new (custom) {}"
-                      "".format(ThisClass.__name__))
+                # print("Creating a new (custom) {}"
+                # #   "".format(ThisClass.__name__))
             elif kvc.rvalue.value is None:
                 # Syntax "ThisClass:" denotes class (could be null or
                 # object declaration in YAML, but is an object
@@ -145,8 +148,8 @@ class App(tk.Tk):
                                       "".format(lineN, fn,
                                                 line.strip()))
                 # deeperO = ThisClass()
-                print("Creating a new {}"
-                      "".format(ThisClass.__name__))
+                # print("Creating a new {}"
+                # #     "".format(ThisClass.__name__))
             else:
                 if len(stack) == 0:
                     raise SyntaxError(dent + "Line {} of {} has a"
@@ -155,17 +158,78 @@ class App(tk.Tk):
                                                      line.strip()))
 
                 if kvc.rvalue.className is not None:
-                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue
-                    warn(dent + "Line {} of {} has a KV value `{}` near"
-                         " `{}`"
-                         "".format(lineN, fn, kvc.rvalue, line.strip()))
+                    if kvc.lvalue.value == "orientation":
+                        stack[-1].orientation = kvc.rvalue.value
+                    elif kvc.lvalue.value == 'id':
+                        # thisId = kvc.rvalue.value
+                        stack[-1].id = kvc.rvalue.value
+                        self.ids[kvc.rvalue.value] = stack[-1]
+                    elif kvc.lvalue.value == 'text':
+                        # thisId = kvc.rvalue.value
+
+                        if callable(stack[-1].text):
+                            raise RuntimeError(
+                                "The text override failed due to a"
+                                " programming error in kivy-tkinter"
+                                " itself."
+                            )
+                            # stack[-1].text(kvc.rvalue.value)
+                        stack[-1].text = kvc.rvalue.value
+                    elif kvc.rvalue.methodName is not None:
+                        methodName = kvc.rvalue.methodName
+                        if methodName.startswith("root."):
+                            methodName = methodName.replace(
+                                "root.",
+                                "self.frame."
+                            )
+                            print(dent + "using method `{}`"
+                                  "".format(methodName))
+                        elif methodName.startswith("self."):
+                            methodName = methodName.replace(
+                                "self.",
+                                "self.ids." + stack[-1].id + "."
+                            )
+                            print(dent + "using method `{}`"
+                                  "".format(methodName))
+                        elif methodName.startswith("app."):
+                            methodName = methodName.replace(
+                                "app.",
+                                "KT.APP."
+                            )
+                            print(dent + "using method `{}`"
+                                  "".format(methodName))
+                        else:
+                            raise NotImplementedError(
+                                "The object in  the method call is not"
+                                " implemented: {}".format(methodName)
+                            )
+                        """
+                        print(dent + "trying to add {} to {}"
+                              "".format(kvc.lvalue.value,
+                                        type(stack[-1]).__name__))
+                        """
+                        if kvc.lvalue.value == 'on_press':
+                            stack[-1].bind(on_press=eval(methodName))
+                        else:
+                            raise NotImplementedError(
+                                "The `{}` handler is not implemented."
+                                "".format(kvc.lvalue.value)
+                            )
+                    elif not hasattr(stack[-1], kvc.lvalue.value):
+                        warn(dent + "Line {} of {} has a KV value `{}`"
+                             " for {}, which is not implemented, near"
+                             " `{}`".format(lineN, fn, kvc.rvalue,
+                                            kvc.lvalue, line.strip()))
+                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
                 else:
                     # A literal None implies that the parser could not
                     # detect the type.
-                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue
-                    warn(dent + "Line {} of {} has an rvalue"
-                         " that will be taken literally: `{}` near `{}`"
-                         "".format(lineN, fn, kvc.rvalue, line.strip()))
+                    if not hasattr(stack[-1], kvc.lvalue.value):
+                        warn(dent + "Line {} of {} has an rvalue"
+                             " that will be taken literally: `{}` near"
+                             " `{}`".format(lineN, fn, kvc.rvalue,
+                                            line.strip()))
+                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
                     # TODO: implement KV rules such as:
                     # right: self.parent.right
                     # right: layout.right # where id of parent is layout
@@ -175,6 +239,14 @@ class App(tk.Tk):
                     # ^ Make the child objects get appended to the frame
                     #   (root widget)
                 else:
+                    """
+                    if thisOr is not None:
+                        deeperO = ThisClass(
+                            tkinterParent=stack[-1],
+                            orientation=thisOr,
+                        )
+                    else:
+                    """
                     deeperO = ThisClass(tkinterParent=stack[-1])
                     if not hasattr(stack[-1], 'add_widget'):
                         exFmt = (dent + "Line {} of {} has a `{}`"
@@ -186,6 +258,8 @@ class App(tk.Tk):
                                          line.strip())
                         )
                     stack[-1].add_widget(deeperO)
+                # if thisId is not None:
+                # self.frame.ids[thisId] = deeperO
                 stack.append(deeperO)
 
     def build(self):

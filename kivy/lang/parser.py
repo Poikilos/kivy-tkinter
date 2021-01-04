@@ -27,6 +27,7 @@ class ParserVariable:
 
     def __init__(self, s, rvalue):
         self.className = None
+        self.methodName = None
         self.value = None
         self.comment = None
         self.isCustomClass = False
@@ -51,6 +52,8 @@ class ParserVariable:
                 if Parser.isEnclosed(s, "<"):
                     self.className = s[1:-1]
                     self.isCustomClass = True
+                elif s.endswith("()"):
+                    raise ValueError("A method can't be an lvalue.")
             else:
                 # It is an rvalue.
                 # TODO: allow inline comments
@@ -63,6 +66,9 @@ class ParserVariable:
                 elif Parser.isQuoted(s):
                     self.value = s[1:-1]
                     self.className = 'string'
+                elif s.endswith("()"):
+                    self.value = s
+                    self.methodName = s[:-2]
                 elif Parser.isEnclosed(s, '('):
                     v = s[1:-1]
                     try:

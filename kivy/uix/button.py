@@ -15,5 +15,8 @@ class Button(ttk.Button, Label):
 
     def __init__(self, **kwargs):
         Label.__init__(self, **kwargs)
-        ttk.Button.__init__(self, self.parent)
-        print("The parent of a Button is {}".format(self.parent))
+        ttk.Button.__init__(self, self.parent, textvariable=self._sv)
+        # print("The parent of a Button is {}".format(self.parent))
+
+    def bind(self, **kwargs):
+        Label.bind(self, **kwargs)

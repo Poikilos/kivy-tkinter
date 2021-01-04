@@ -2,8 +2,9 @@
 import sys
 import traceback
 
-class APP:
-    ROOT = None
+class KT:
+    APP = None
+    indent = ""
 
 
 def warn(msg):

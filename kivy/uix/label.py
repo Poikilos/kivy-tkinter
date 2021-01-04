@@ -16,4 +16,7 @@ class Label(ttk.Label, Widget):
     def __init__(self, **kwargs):
         Widget.__init__(self, **kwargs)
         ttk.Label.__init__(self, self.parent)
-        print("The parent of a Label is {}".format(self.parent))
+        # print("The parent of a Label is {}".format(self.parent))
+
+    def bind(self, **kwargs):
+        Widget.bind(self, **kwargs)

@@ -18,4 +18,4 @@ class Layout(Widget):
 
     def __init__(self, **kwargs):
         Widget.__init__(self, **kwargs)
-        print("(The parent of a Layout is {})".format(self.parent))
+        # print("(The parent of a Layout is {})".format(self.parent))
