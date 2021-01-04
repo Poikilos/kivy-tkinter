@@ -10,6 +10,7 @@ except ImportError:  # Python 2
     import ttk
 
 from kivy.uix.widget import Widget
+from kivy.properties import ListProperty
 
 class TextInput(ttk.Entry, Widget):
 
@@ -31,3 +32,7 @@ class TextInput(ttk.Entry, Widget):
                                " before calling {}.finalize."
                                "".format(type(self).__name__))
         ttk.Entry.__init__(self, self.parent, textvariable=self._sv)
+        self.children = ListProperty(self.children)
+        # ^ coerce Tkinter to use a ListProperty
+        #   (kivy-tkinter's ListProperty is adaptive so dict-like
+        #   behavior used by Tkinter should work)

@@ -10,6 +10,8 @@ except ImportError:  # Python 2
     import ttk
 
 from kivy.uix.label import Label
+from kivy.properties import ListProperty
+
 
 class Button(ttk.Button, Label):
 
@@ -30,6 +32,10 @@ class Button(ttk.Button, Label):
                                "".format(type(self).__name__))
         ttk.Button.__init__(self, self.parent,
                             textvariable=self._sv)
+        self.children = ListProperty(self.children)
+        # ^ coerce Tkinter to use a ListProperty
+        #   (kivy-tkinter's ListProperty is adaptive so dict-like
+        #   behavior used by Tkinter should work)
 
     def bind(self, **kwargs):
         Label.bind(self, **kwargs)

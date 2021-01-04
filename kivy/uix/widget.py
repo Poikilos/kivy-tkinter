@@ -16,6 +16,7 @@ except ImportError:  # Python 2
 from kivy.kivytkinter import KT
 from kivy.kivytkinter import warn
 from kivy.properties import DictProperty
+from kivy.properties import ListProperty
 
 class Widget:
     ids = DictProperty({})
@@ -26,6 +27,7 @@ class Widget:
         self._opacity = 1.0
         self._last_gm = None
         self._size_hint = (1.0, 1.0)
+        self.children = ListProperty([])
 
         self.parent = None
 
@@ -63,6 +65,10 @@ class Widget:
         else:
             raise NotImplementedError("{} is not implemented."
                                       "".format(kwargs))
+
+    def finalize(self):
+        raise RuntimeError("You must implement finalize in each"
+                           " widget subclass in kivy-tkinter.")
 
     @property
     def text(self):

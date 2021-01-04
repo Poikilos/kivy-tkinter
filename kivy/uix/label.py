@@ -10,6 +10,8 @@ except ImportError:  # Python 2
     import ttk
 
 from kivy.uix.widget import Widget
+from kivy.properties import ListProperty
+
 
 class Label(tk.Message, Widget):
 
@@ -29,6 +31,10 @@ class Label(tk.Message, Widget):
         # ^ ttk.Label doesn't have multiple lines
         # ^ tk.Message has multiple lines
         # ^ tk.Text has multiple fonts
+        self.children = ListProperty(self.children)
+        # ^ coerce Tkinter to use a ListProperty
+        #   (kivy-tkinter's ListProperty is adaptive so dict-like
+        #   behavior used by Tkinter should work)
 
     def bind(self, **kwargs):
         Widget.bind(self, **kwargs)

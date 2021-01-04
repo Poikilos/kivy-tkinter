@@ -16,6 +16,8 @@ from kivy.kivytkinter import KT
 from kivy.uix.layout import Layout
 from kivy.kivytkinter import view_traceback
 from kivy.kivytkinter import error
+from kivy.properties import ListProperty
+
 
 class BoxLayout(ttk.Frame, Layout):
 
@@ -43,6 +45,10 @@ class BoxLayout(ttk.Frame, Layout):
                                " before calling {}.finalize."
                                "".format(type(self).__name__))
         ttk.Frame.__init__(self, self.parent)
+        self.children = ListProperty(self.children)
+        # ^ coerce Tkinter to use a ListProperty
+        #   (kivy-tkinter's ListProperty is adaptive so dict-like
+        #   behavior used by Tkinter should work)
 
     def add_widget(self, widget, index=0, canvas=None):
         if widget.parent is None:
@@ -97,3 +103,4 @@ class BoxLayout(ttk.Frame, Layout):
         else:
             raise ValueError("A Tkinter geometry manager named {} is"
                              " not implemented.".format(self.gm))
+        self.children.append(widget)
