@@ -11,11 +11,14 @@ except ImportError:  # Python 2
 
 from kivy.uix.widget import Widget
 
-class Label(ttk.Label, Widget):
+class Label(tk.Message, Widget):
 
     def __init__(self, **kwargs):
         Widget.__init__(self, **kwargs)
-        ttk.Label.__init__(self, self.parent)
+        tk.Message.__init__(self, self.parent, textvariable=self._sv)
+        # ^ ttk.Label doesn't have multiple lines
+        # ^ tk.Message has multiple lines
+        # ^ tk.Text has multiple fonts
         # print("The parent of a Label is {}".format(self.parent))
 
     def bind(self, **kwargs):
