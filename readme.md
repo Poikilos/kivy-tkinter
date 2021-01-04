@@ -1,6 +1,10 @@
 # kivy-tkinter
 Run some simple Kivy and KV code purely using the Tkinter framework!
 
+Use Tkinter using the Kivy coding style and the declarative KV language
+with no changes to your Kivy project's code (If it doesn't run, this
+project should change rather than your code--see "Development").
+
 Only some simple widgets are implemented so far.
 
 
@@ -51,6 +55,8 @@ apps include:
 #### After (kivy-tkinter)
 ![IntroCompatiblizer after](doc/images/IntroCompatiblizer-after.png)
 
+## Development
+See [contributing.md](contributing.md)
 
 ## Links
 - [kivy-tkinter on Reddit](https://www.reddit.com/r/kivy/comments/kqh0gl/kivytkinter_a_wip_compatibility_layer_to_run_kivy/)
