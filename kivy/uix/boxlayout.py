@@ -14,6 +14,8 @@ __all__ = ('BoxLayout', )
 
 from kivy.kivytkinter import KT
 from kivy.uix.layout import Layout
+from kivy.kivytkinter import view_traceback
+from kivy.kivytkinter import error
 
 class BoxLayout(ttk.Frame, Layout):
 
@@ -29,11 +31,24 @@ class BoxLayout(ttk.Frame, Layout):
         if "orientation" in kwargs:
             del kwargs["orientation"]
 
-        ttk.Frame.__init__(self, self.parent)
+        if self.parent is not None:
+            self.finalize()
         # print("The parent of a BoxLayout is {} and the orientation is"
         # #     " {}".format(self.parent, self.orientation))
 
+    def finalize(self):
+        if self.parent is None:
+            raise RuntimeError("[kivy-tkinter]"
+                               " kivy-tkinter failed to set a parent"
+                               " before calling {}.finalize."
+                               "".format(type(self).__name__))
+        ttk.Frame.__init__(self, self.parent)
+
     def add_widget(self, widget, index=0, canvas=None):
+        if widget.parent is None:
+            # It must have been generated in Python.
+            widget.parent = self
+            widget.finalize()
         # TODO: implement pos_hint
         pre = "[BoxLayout add_widget] "
         if index != 0:
@@ -50,18 +65,34 @@ class BoxLayout(ttk.Frame, Layout):
                             type(self).__name__))
             '''
             widget.atI = self.layoutI
-            if self.orientation == "horizontal":
-                widget.grid(column=self.layoutI, row=0,
-                            sticky=tk.N+tk.S)
-            elif self.orientation == "vertical":
-                widget.grid(column=0, row=self.layoutI,
-                            sticky=tk.W+tk.E)
-            else:
-                raise ValueError(
-                    "Unknown Kivy orientation: {} '{}'"
-                    "".format(type(self.orientation).__name__,
-                              self.orientation)
-                )
+            try:
+                if self.orientation == "horizontal":
+                    widget.grid(column=self.layoutI, row=0,
+                                sticky=tk.N+tk.S)
+                elif self.orientation == "vertical":
+                    widget.grid(column=0, row=self.layoutI,
+                                sticky=tk.W+tk.E)
+                else:
+                    raise ValueError(
+                        "Unknown Kivy orientation: {} '{}'"
+                        "".format(type(self.orientation).__name__,
+                                  self.orientation)
+                    )
+                widget._last_gm = 'grid'
+            except tk.TclError as ex:
+                view_traceback()
+                error("The parent {} of {} {} is a {}".format(
+                    self.parentId(),
+                    type(self).__name__,
+                    self.id,
+                    type(self.parent).__name__,
+                ))
+                raise RuntimeError("[kivy-tkinter kivy.uix.boxlayout]"
+                                   " If grid failed due to"
+                                   " using pack, the item should be a"
+                                   " grid but kivy-tkinter failed to"
+                                   " ensure that (Tkinter says: {}"
+                                   ").".format(ex))
             self.layoutI += 1
         else:
             raise ValueError("A Tkinter geometry manager named {} is"

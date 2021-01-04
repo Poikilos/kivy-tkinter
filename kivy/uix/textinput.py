@@ -18,8 +18,16 @@ class TextInput(ttk.Entry, Widget):
         # TODO: in Kivy, a subclass of any given widget subclass would
         # require setting text to "root.sv" in KV, where sv was a
         # StringProperty in the subclass.
-        ttk.Entry.__init__(self, self.parent, textvariable=self._sv)
         if 'text' in kwargs:
             self.sv.set(kwargs['text'])
         # print("The parent of a Label is {}".format(self.parent))
+        if self.parent is not None:
+            self.finalize()
 
+    def finalize(self):
+        if self.parent is None:
+            raise RuntimeError("[kivy-tkinter]"
+                               " kivy-tkinter failed to set a parent"
+                               " before calling {}.finalize."
+                               "".format(type(self).__name__))
+        ttk.Entry.__init__(self, self.parent, textvariable=self._sv)

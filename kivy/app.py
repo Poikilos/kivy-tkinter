@@ -82,8 +82,12 @@ class App(tk.Tk):
         # ^ Ok since kivy-tkinter widget constructors always set the
         #   parent to App.ROOT by default--so no matter how the client
         #   code creates the root widget, the parent will be `App.ROOT`.
+        if KT.PACKED is not None:
+            raise RuntimeError("kivy-tkinter built twice!")
         self.frame.pack(fill=tk.BOTH, expand=True)
-        self.frame.parent = None
+        KT.PACKED = self.frame
+        # self.frame.grid()
+        self.frame.parent = KT.APP
         # ^ But technically, KT.APP is the root widget's
         #   (KT.APP.frame's) parent
         lineN = 0
@@ -158,26 +162,6 @@ class App(tk.Tk):
                                       " `{}`".format(lineN, fn,
                                                      line.strip()))
 
-                if kvc.rvalue.className is not None:
-                    if not hasattr(stack[-1], kvc.lvalue.value):
-                        warn(dent + "Line {} of {} has a KV value `{}`"
-                             " for {}, which is not implemented, near"
-                             " `{}`".format(lineN, fn, kvc.rvalue,
-                                            kvc.lvalue, line.strip()))
-                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
-                else:
-                    # A literal None implies that the parser could not
-                    # detect the type.
-                    if not hasattr(stack[-1], kvc.lvalue.value):
-                        warn(dent + "Line {} of {} has an rvalue"
-                             " that will be taken literally: `{}` near"
-                             " `{}`".format(lineN, fn, kvc.rvalue,
-                                            line.strip()))
-                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
-                    # TODO: implement KV rules such as:
-                    # right: self.parent.right
-                    # right: layout.right # where id of parent is layout
-
                 # Add events and properties for both KV and custom
                 # classes (regardless of kvc.rvalue.className presence):
                 if kvc.lvalue.value == "orientation":
@@ -204,22 +188,28 @@ class App(tk.Tk):
                             "root.",
                             "self.frame."
                         )
+                        '''
                         print(dent + "using method `{}`"
                               "".format(methodName))
+                        '''
                     elif methodName.startswith("self."):
                         methodName = methodName.replace(
                             "self.",
                             "self.frame.ids." + stack[-1].id + "."
                         )
+                        '''
                         print(dent + "using method `{}`"
                               "".format(methodName))
+                        '''
                     elif methodName.startswith("app."):
                         methodName = methodName.replace(
                             "app.",
                             "KT.APP."
                         )
+                        '''
                         print(dent + "using method `{}`"
                               "".format(methodName))
+                        '''
                     else:
                         raise NotImplementedError(
                             "The object in  the method call is not"
@@ -237,6 +227,28 @@ class App(tk.Tk):
                             "The `{}` handler is not implemented."
                             "".format(kvc.lvalue.value)
                         )
+
+                elif kvc.rvalue.className is not None:
+                    if not hasattr(stack[-1], kvc.lvalue.value):
+                        warn(dent + "Line {} of {} has a KV value `{}`"
+                             " for {}, which is not implemented, near"
+                             " `{}`".format(lineN, fn, kvc.rvalue,
+                                            kvc.lvalue, line.strip()))
+                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
+                else:
+                    # A literal None implies that the parser could not
+                    # detect the type.
+                    if not hasattr(stack[-1], kvc.lvalue.value):
+                        warn(dent + "Line {} of {} has an rvalue"
+                             " that will be taken literally: `{}` near"
+                             " `{}`".format(lineN, fn, kvc.rvalue,
+                                            line.strip()))
+                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
+                    # TODO: implement KV rules such as:
+                    # right: self.parent.right
+                    # right: layout.right # where id of parent is layout
+
+
 
 
 
@@ -259,7 +271,13 @@ class App(tk.Tk):
                         )
                     else:
                     '''
-                    deeperO = ThisClass(tkinterParent=stack[-1])
+                    deeperO = ThisClass(
+                        tkinterParent=stack[-1]
+                    )
+                    '''
+                    print(dent + "tkinterParent is {}"
+                          "".format(stack[-1]))
+                    '''
                     if not hasattr(stack[-1], 'add_widget'):
                         exFmt = (dent + "Line {} of {} has a `{}`"
                                  " inside of a `{}` near `{}`.")

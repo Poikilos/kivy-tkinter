@@ -24,6 +24,7 @@ class Widget:
         self.id = None
         self._sv = tk.StringVar()
         self._opacity = 1.0
+        self._last_gm = None
         self._size_hint = (1.0, 1.0)
 
         self.parent = None
@@ -40,14 +41,25 @@ class Widget:
                       "".format(k))
 
         if self.parent is None:
-            self.parent = KT.APP
+            if KT.PACKED is not None:
+                '''
+                raise RuntimeError("[kivy-tkinter kivy.uix.widget]"
+                                   " The parent is None but there is"
+                                   " already a main form.")
+                '''
+                # self.parent = KT.APP.frame
+                # That's ok, we can auto-detect that in add_widget.
+            else:
+                self.parent = KT.APP
 
     def bind(self, **kwargs):
         on_press = kwargs.get('on_press')
         if on_press is not None:
             self.configure(command=on_press)
+            '''
             print(KT.indent + "command for {} is now a {}"
                   "".format(self.id, type(on_press).__name__))
+            '''
         else:
             raise NotImplementedError("{} is not implemented."
                                       "".format(kwargs))
@@ -58,10 +70,12 @@ class Widget:
 
     @text.setter
     def text(self, value):
+        '''
         print("Setting text for {} to \"{}\".".format(
             type(self).__name__,
             value,
         ))
+        '''
         self._sv.set(value)
 
     @property
@@ -70,17 +84,35 @@ class Widget:
 
     @opacity.setter
     def opacity(self, value):
-        self._opacity = value
+
         if self.parent.gm == 'grid':
             if value < 0.5:
-                self.grid_remove()
+                if self._opacity >= 0.5:
+                    self.grid_remove()
+                # grid_remove remembers the row and column, but
+                # grid_forget does not.
             else:
-                self.grid()
+                if self._opacity < 0.5:
+                    if self._last_gm is None:
+                        raise RuntimeError("The grid item is not marked"
+                                           " as having been in a grid.")
+                    self.grid()
         else:
+            raise NotImplementedError("The Tkinter geometry manager {}"
+                                      " used by {} id:{} is not"
+                                      " implemented in kivy-tkinter."
+                                      "".format(
+                type(self.parent).__name__,
+                self.parentId(),
+                self.parent.gm,
+            ))
             if value < 0.5:
-                self.pack_forget()
+                if self._opacity >= 0.5:
+                    self.pack_forget()
             else:
-                self.pack()
+                if self._opacity < 0.5:
+                    self.pack()
+        self._opacity = value
 
     @property
     def size_hint(self):
@@ -105,6 +137,11 @@ class Widget:
                 print("{} is not implemented for size_hint values."
                       " Try float.")
         self._size_hint = tuple(conv)
+
+    def parentId(self):
+        if self.parent is not None:
+            return self.parent.id
+        return None
 
 
 class WidgetException(Exception):
