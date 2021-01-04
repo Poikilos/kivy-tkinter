@@ -44,9 +44,11 @@ class BoxLayout(ttk.Frame, Layout):
             raise AttributeError("The BoxLayout must define a"
                                  " Tkinter geometry manager.")
         if self.gm == "grid":
+            '''
             print(KT.indent + "+adding a {} to a {}..."
                   "".format(type(widget).__name__,
                             type(self).__name__))
+            '''
             widget.atI = self.layoutI
             if self.orientation == "horizontal":
                 widget.grid(column=self.layoutI, row=0,

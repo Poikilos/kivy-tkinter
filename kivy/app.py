@@ -19,7 +19,6 @@ from kivy.lang import Builder
 from kivy.lang import Parser
 from kivy.kivytkinter import warn
 from kivy.kivytkinter import view_traceback
-from kivy.properties import DictProperty
 
 from kivy.kivytkinter import KT
 # ^ this must be done from a dumb file that every file imports, because
@@ -70,7 +69,6 @@ class App(tk.Tk):
         '''
         KT.indent = ""
         prevIndent = None
-        self.ids = DictProperty({})
         stack = []
         # print("I am a {}.".format(str(type(self).__name__)))
         frame = inspect.stack()[2]
@@ -80,6 +78,7 @@ class App(tk.Tk):
         # print("The file with custom widgets is \"{}\".".format(cfp))
         KT.APP = self
         self.frame = self.build()
+
         # ^ Ok since kivy-tkinter widget constructors always set the
         #   parent to App.ROOT by default--so no matter how the client
         #   code creates the root widget, the parent will be `App.ROOT`.
@@ -113,8 +112,10 @@ class App(tk.Tk):
                     # add the widget AFTER setting all properties ?
                     # stack[-1].parent.add_widget(stack[-1])
                 del stack[-1]
+                '''
                 print(dent + "Line {} of {} starts a new object"
                       " near `{}`.".format(lineN, fn, line.strip()))
+                '''
             KT.indent = dent
             kvc = Parser.parserStatement(lineS)
             deeperO = None
@@ -158,64 +159,7 @@ class App(tk.Tk):
                                                      line.strip()))
 
                 if kvc.rvalue.className is not None:
-                    if kvc.lvalue.value == "orientation":
-                        stack[-1].orientation = kvc.rvalue.value
-                    elif kvc.lvalue.value == 'id':
-                        # thisId = kvc.rvalue.value
-                        stack[-1].id = kvc.rvalue.value
-                        self.ids[kvc.rvalue.value] = stack[-1]
-                    elif kvc.lvalue.value == 'text':
-                        # thisId = kvc.rvalue.value
-
-                        if callable(stack[-1].text):
-                            raise RuntimeError(
-                                "The text override failed due to a"
-                                " programming error in kivy-tkinter"
-                                " itself."
-                            )
-                            # stack[-1].text(kvc.rvalue.value)
-                        stack[-1].text = kvc.rvalue.value
-                    elif kvc.rvalue.methodName is not None:
-                        methodName = kvc.rvalue.methodName
-                        if methodName.startswith("root."):
-                            methodName = methodName.replace(
-                                "root.",
-                                "self.frame."
-                            )
-                            print(dent + "using method `{}`"
-                                  "".format(methodName))
-                        elif methodName.startswith("self."):
-                            methodName = methodName.replace(
-                                "self.",
-                                "self.ids." + stack[-1].id + "."
-                            )
-                            print(dent + "using method `{}`"
-                                  "".format(methodName))
-                        elif methodName.startswith("app."):
-                            methodName = methodName.replace(
-                                "app.",
-                                "KT.APP."
-                            )
-                            print(dent + "using method `{}`"
-                                  "".format(methodName))
-                        else:
-                            raise NotImplementedError(
-                                "The object in  the method call is not"
-                                " implemented: {}".format(methodName)
-                            )
-                        """
-                        print(dent + "trying to add {} to {}"
-                              "".format(kvc.lvalue.value,
-                                        type(stack[-1]).__name__))
-                        """
-                        if kvc.lvalue.value == 'on_press':
-                            stack[-1].bind(on_press=eval(methodName))
-                        else:
-                            raise NotImplementedError(
-                                "The `{}` handler is not implemented."
-                                "".format(kvc.lvalue.value)
-                            )
-                    elif not hasattr(stack[-1], kvc.lvalue.value):
+                    if not hasattr(stack[-1], kvc.lvalue.value):
                         warn(dent + "Line {} of {} has a KV value `{}`"
                              " for {}, which is not implemented, near"
                              " `{}`".format(lineN, fn, kvc.rvalue,
@@ -233,20 +177,88 @@ class App(tk.Tk):
                     # TODO: implement KV rules such as:
                     # right: self.parent.right
                     # right: layout.right # where id of parent is layout
+
+                # Add events and properties for both KV and custom
+                # classes (regardless of kvc.rvalue.className presence):
+                if kvc.lvalue.value == "orientation":
+                    stack[-1].orientation = kvc.rvalue.value
+                elif kvc.lvalue.value == 'id':
+                    # thisId = kvc.rvalue.value
+                    stack[-1].id = kvc.rvalue.value
+                    self.frame.ids[kvc.rvalue.value] = stack[-1]
+                elif kvc.lvalue.value == 'text':
+                    # thisId = kvc.rvalue.value
+
+                    if callable(stack[-1].text):
+                        raise RuntimeError(
+                            "The text override failed due to a"
+                            " programming error in kivy-tkinter"
+                            " itself."
+                        )
+                        # stack[-1].text(kvc.rvalue.value)
+                    stack[-1].text = kvc.rvalue.value
+                elif kvc.rvalue.methodName is not None:
+                    methodName = kvc.rvalue.methodName
+                    if methodName.startswith("root."):
+                        methodName = methodName.replace(
+                            "root.",
+                            "self.frame."
+                        )
+                        print(dent + "using method `{}`"
+                              "".format(methodName))
+                    elif methodName.startswith("self."):
+                        methodName = methodName.replace(
+                            "self.",
+                            "self.frame.ids." + stack[-1].id + "."
+                        )
+                        print(dent + "using method `{}`"
+                              "".format(methodName))
+                    elif methodName.startswith("app."):
+                        methodName = methodName.replace(
+                            "app.",
+                            "KT.APP."
+                        )
+                        print(dent + "using method `{}`"
+                              "".format(methodName))
+                    else:
+                        raise NotImplementedError(
+                            "The object in  the method call is not"
+                            " implemented: {}".format(methodName)
+                        )
+                    '''
+                    print(dent + "trying to add {} to {}"
+                          "".format(kvc.lvalue.value,
+                                    type(stack[-1]).__name__))
+                    '''
+                    if kvc.lvalue.value == 'on_press':
+                        stack[-1].bind(on_press=eval(methodName))
+                    else:
+                        raise NotImplementedError(
+                            "The `{}` handler is not implemented."
+                            "".format(kvc.lvalue.value)
+                        )
+
+
+
+
+
+
+
+
             if ThisClass is not None:
                 if len(stack) == 0:
                     deeperO = self.frame
                     # ^ Make the child objects get appended to the frame
                     #   (root widget)
                 else:
-                    """
+                    '''
                     if thisOr is not None:
                         deeperO = ThisClass(
                             tkinterParent=stack[-1],
                             orientation=thisOr,
                         )
                     else:
-                    """
+                    '''
                     deeperO = ThisClass(tkinterParent=stack[-1])
                     if not hasattr(stack[-1], 'add_widget'):
                         exFmt = (dent + "Line {} of {} has a `{}`"
