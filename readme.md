@@ -3,6 +3,7 @@ Run some simple Kivy and KV code purely using the Tkinter framework!
 
 Only some simple widgets are implemented so far.
 
+
 ## Usage
 Link or copy the kivy-tkinter/kivy directory into your app.
 
@@ -16,12 +17,13 @@ ln -s ~/git/kivy-tkinter/kivy
 ```
 
 Then run your app on a system or virtualenv that does not have Kivy, or
-otherwise coerce python to use the directory above rather than your
+otherwise coerce Python to use the directory above rather than your
 Kivy. If you aren't sure which is running, see the differences in the
 theme as seen in the screenshots.
 
 ### Troubleshooting
 - Doesn't Open
+
   If the app doesn't open, try running it from a command line interface
   to see the output.
 
