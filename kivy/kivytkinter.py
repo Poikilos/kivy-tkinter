@@ -2,6 +2,7 @@
 import sys
 import traceback
 
+
 class KT:
     '''
     Access important kivy-tkinter values.
@@ -13,11 +14,14 @@ class KT:
     APP = None
     FORM = None
     indent = ""
+    MIN_W = 400
+    MIN_H = 300
 
 
 def warn(msg):
     sys.stderr.write("Warning: {}\n".format(msg))
     print(msg)
+
 
 def view_traceback(indent=""):
     ex_type, ex, tb = sys.exc_info()
@@ -25,6 +29,7 @@ def view_traceback(indent=""):
     print(indent+str(ex))
     traceback.print_tb(tb)
     del tb
+
 
 def error(msg):
     sys.stderr.write("ERROR: {}\n".format(msg))

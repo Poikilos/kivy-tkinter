@@ -12,11 +12,11 @@ except ImportError:  # Python 2
 
 __all__ = ('BoxLayout', )
 
-from kivy.kivytkinter import KT
 from kivy.uix.layout import Layout
 from kivy.kivytkinter import view_traceback
 from kivy.kivytkinter import error
 from kivy.properties import ListProperty
+from kivy.kivytkinter import KT
 
 
 class BoxLayout(ttk.Frame, Layout):

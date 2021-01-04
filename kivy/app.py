@@ -34,6 +34,8 @@ from kivy.uix.textinput import TextInput
 
 class App(tk.Tk):
     IS_TKINTER = True
+    KT.MIN_W = 400
+    KT.MIN_H = 300
 
     def __init__(self):
         tk.Tk.__init__(self)
@@ -41,10 +43,11 @@ class App(tk.Tk):
         if title.endswith("App"):
             title = title[:-3]
         self.title(title)
-        self.minsize(32,32)
+        self.minsize(KT.MIN_W, KT.MIN_H)
         # ^ Prevent weird tkinter behavior creating a 1px wide window
         #   only as high as the title bar when fill=tk.BOTH, expand=True
         #   and there are no widgets.
+        self.id = None
 
     def run(self):
         self.parser = Parser(content=Builder._loadedStr)

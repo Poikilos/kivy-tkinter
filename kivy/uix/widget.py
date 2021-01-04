@@ -91,6 +91,19 @@ class Widget:
             value,
         ))
         '''
+
+        '''
+        if self.parent is not None:
+            # For some reason, this makes the window really huge.
+            # width = self.parent.winfo_width()
+            # ^ at this point, the width is usually KT.MIN_W
+            width = 0
+            if width < KT.MIN_W:
+                width = KT.MIN_W
+            print("Setting width of {} to {}".format(self.id, width))
+            self.configure(width=width)
+        '''
+
         self._sv.set(value)
 
     @property

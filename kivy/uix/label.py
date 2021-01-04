@@ -11,7 +11,7 @@ except ImportError:  # Python 2
 
 from kivy.uix.widget import Widget
 from kivy.properties import ListProperty
-
+from kivy.kivytkinter import KT
 
 class Label(tk.Message, Widget):
 
@@ -27,10 +27,19 @@ class Label(tk.Message, Widget):
                                " kivy-tkinter failed to set a parent"
                                " before calling {}.finalize."
                                "".format(type(self).__name__))
-        tk.Message.__init__(self, self.parent, textvariable=self._sv)
+        width = self.parent.winfo_width()
+        # ^ at this point, the width is usually KT.MIN_W
+        if width < KT.MIN_W:
+            width = KT.MIN_W
+        tk.Message.__init__(
+            self,
+            self.parent,
+            textvariable=self._sv,
+            width=width,
+        )
         # ^ ttk.Label doesn't have multiple lines
         # ^ tk.Message has multiple lines
-        # ^ tk.Text has multiple fonts
+        # ^ tk.Text has multiple lines & multiple fonts not textvariable
         self.children = ListProperty(self.children)
         # ^ coerce Tkinter to use a ListProperty
         #   (kivy-tkinter's ListProperty is adaptive so dict-like
