@@ -56,4 +56,4 @@ apps include:
 - [kivy-tkinter on Reddit](https://www.reddit.com/r/kivy/comments/kqh0gl/kivytkinter_a_wip_compatibility_layer_to_run_kivy/)
 - [kivy-tkinter on kivy-users](https://groups.google.com/g/kivy-users/c/um19B__0ArU) on Google Groups
 - [poikilos.org](https://poikilos.org) dev blog
-- [kivy-tkinter on kivy/your-projects](https://discord.com/channels/423249981340778496/498526835337068581/795768163932569652) on Discord
+- [kivy-tkinter on kivy General #your-projects](https://discord.com/channels/423249981340778496/498526835337068581/795768163932569652) on Discord
