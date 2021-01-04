@@ -37,7 +37,15 @@ class Widget:
             del kwargs["tkinterParent"]
 
         for k,v in kwargs.items():
-            if hasattr(self, k):
+            if k == 'text':
+                # INFO: This must occur for each property, otherwise the
+                # property will be overwritten by a plain variable!
+                self.text = v
+            elif k == 'opacity':
+                self.opacity = v
+            elif k == 'size_hint':
+                self.size_hint = v
+            elif hasattr(self, k):
                 self.__dict__[k] = v
             else:
                 print("  - The `{}` property is not implemented."
@@ -122,7 +130,10 @@ class Widget:
                 if self.parent.gm == 'grid':
                     if self._last_gm is None:
                         raise RuntimeError("The grid item is not marked"
-                                           " as having been in a grid.")
+                                           " as having been in a grid,"
+                                           " so placing it in the"
+                                           " correct slot is"
+                                           " impossible.")
                     self.grid()
                 else:
                     self.pack()
