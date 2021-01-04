@@ -90,6 +90,7 @@ class BoxLayout(ttk.Frame, Layout):
                         "".format(type(self.orientation).__name__,
                                   self.orientation)
                     )
+                widget._added = True
                 tk.Grid.rowconfigure(widget.parent, row, weight=1)
                 tk.Grid.columnconfigure(widget.parent, column, weight=1)
                 # ^ expand

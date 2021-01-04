@@ -37,16 +37,11 @@ class Widget:
             del kwargs["tkinterParent"]
 
         for k,v in kwargs.items():
-            if k == 'text':
-                # INFO: This must occur for each property, otherwise the
-                # property will be overwritten by a plain variable!
-                self.text = v
-            elif k == 'opacity':
-                self.opacity = v
-            elif k == 'size_hint':
-                self.size_hint = v
-            elif hasattr(self, k):
-                self.__dict__[k] = v
+            if hasattr(self, k):
+                # self.__dict__[k] = v
+                # ^ Using dict overwrites a property with a plain
+                # variable!
+                setattr(self, k, v)
             else:
                 print("  - The `{}` property is not implemented."
                       "".format(k))
@@ -121,9 +116,9 @@ class Widget:
         if (value > 1.0) or (value < 0.0):
             raise ValueError("Visibility must be between 0.0 and 1.0")
         if value >= 0.5:
-            setVisible(True)
+            self.setVisible(True)
         else:
-            setVisible(False)
+            self.setVisible(False)
         self._opacity = value
 
     def setVisible(self, visible):
@@ -140,6 +135,7 @@ class Widget:
             # the main form) and since it can't mix with grid.
         if visible:
             if not self._added:
+                # print("showing {}".format(self.id))
                 if self.parent.gm == 'grid':
                     if self._last_gm is None:
                         raise RuntimeError("The grid item is not marked"
@@ -153,6 +149,7 @@ class Widget:
                 self._added = True
         else:
             if self._added:
+                # print("hiding {}".format(self.id))
                 if self.parent.gm == 'grid':
                     self.grid_remove()
                     # grid_remove remembers the row and column, but

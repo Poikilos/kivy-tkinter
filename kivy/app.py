@@ -256,8 +256,15 @@ class App(tk.Tk):
                              " for {}, which is not implemented, near"
                              " `{}`".format(lineN, fn, kvc.rvalue,
                                             kvc.lvalue, line.strip()))
-                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
+                    key = kvc.lvalue.value
+                    value = kvc.rvalue.value
+                    # stack[-1].__dict__[key] = value
+                    # ^ Using dict overwrites a property with a plain
+                    # variable!
+                    setattr(stack[-1], key, value)
                 else:
+                    key = kvc.lvalue.value
+                    value = kvc.rvalue.value
                     # A literal None implies that the parser could not
                     # detect the type.
                     if not hasattr(stack[-1], kvc.lvalue.value):
@@ -265,7 +272,10 @@ class App(tk.Tk):
                              " that will be taken literally: `{}` near"
                              " `{}`".format(lineN, fn, kvc.rvalue,
                                             line.strip()))
-                    stack[-1].__dict__[kvc.lvalue] = kvc.rvalue.value
+                    stack[-1].__dict__[key] = value
+                    # ^ Using dict overwrites a property with a plain
+                    # variable!
+                    setattr(stack[-1], key, value)
                     # TODO: implement KV rules such as:
                     # right: self.parent.right
                     # right: layout.right # where id of parent is layout
