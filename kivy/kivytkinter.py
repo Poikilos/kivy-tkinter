@@ -3,10 +3,15 @@ import sys
 import traceback
 
 class KT:
+    '''
+    Access important kivy-tkinter values.
+    - APP: The root Tk object
+    - FORM: This is the main form that is packed into APP (Tk root),
+      which in Kivy is the widget returned by build (all other widgets
+      are under this one, and use `grid()` not `pack()`.
+    '''
     APP = None
-    PACKED = None
-    # ^ ONLY the window frame widget (whose parent is APP a.k.a. root)
-    #   is packed. Everything else uses grid.
+    FORM = None
     indent = ""
 
 

@@ -26,6 +26,7 @@ class Widget:
         self._sv = tk.StringVar()
         self._opacity = 1.0
         self._last_gm = None
+        self._added = False
         self._size_hint = (1.0, 1.0)
         self.children = ListProperty([])
 
@@ -43,7 +44,7 @@ class Widget:
                       "".format(k))
 
         if self.parent is None:
-            if KT.PACKED is not None:
+            if KT.FORM is not None:
                 '''
                 raise RuntimeError("[kivy-tkinter kivy.uix.widget]"
                                    " The parent is None but there is"
@@ -90,35 +91,51 @@ class Widget:
 
     @opacity.setter
     def opacity(self, value):
+        '''
+        Set opacity in a binary way (visible or invisible).
 
-        if self.parent.gm == 'grid':
-            if value < 0.5:
-                if self._opacity >= 0.5:
-                    self.grid_remove()
-                # grid_remove remembers the row and column, but
-                # grid_forget does not.
-            else:
-                if self._opacity < 0.5:
-                    if self._last_gm is None:
-                        raise RuntimeError("The grid item is not marked"
-                                           " as having been in a grid.")
-                    self.grid()
+        Sequential arguments:
+        value -- A number from 0.0 to 1.0 (>=0.5 is visible).
+        '''
+        if (value > 1.0) or (value < 0.0):
+            raise ValueError("Visibility must be between 0.0 and 1.0")
+        if value >= 0.5:
+            setVisible(True)
         else:
-            raise NotImplementedError("The Tkinter geometry manager {}"
-                                      " used by {} id:{} is not"
-                                      " implemented in kivy-tkinter."
-                                      "".format(
+            setVisible(False)
+        self._opacity = value
+
+    def setVisible(self, visible):
+        if self.parent.gm != 'grid':
+            raise NotImplementedError("The Tkinter geometry manager"
+                                      " {} used by {} id:{} is not"
+                                      " implemented in kivy-tkinter"
+                                      ".".format(
                 type(self.parent).__name__,
                 self.parentId(),
                 self.parent.gm,
             ))
-            if value < 0.5:
-                if self._opacity >= 0.5:
-                    self.pack_forget()
-            else:
-                if self._opacity < 0.5:
+            # Prevent pack since kivy-tkinter never uses it (except for
+            # the main form) and since it can't mix with grid.
+        if visible:
+            if not self._added:
+                if self.parent.gm == 'grid':
+                    if self._last_gm is None:
+                        raise RuntimeError("The grid item is not marked"
+                                           " as having been in a grid.")
+                    self.grid()
+                else:
                     self.pack()
-        self._opacity = value
+                self._added = True
+        else:
+            if self._added:
+                if self.parent.gm == 'grid':
+                    self.grid_remove()
+                    # grid_remove remembers the row and column, but
+                    # grid_forget does not.
+                else:
+                    self.pack_forget()
+                self._added = False
 
     @property
     def size_hint(self):

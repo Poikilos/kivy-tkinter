@@ -82,10 +82,10 @@ class App(tk.Tk):
         # ^ Ok since kivy-tkinter widget constructors always set the
         #   parent to App.ROOT by default--so no matter how the client
         #   code creates the root widget, the parent will be `App.ROOT`.
-        if KT.PACKED is not None:
+        if KT.FORM is not None:
             raise RuntimeError("kivy-tkinter built twice!")
         self.frame.pack(fill=tk.BOTH, expand=True)
-        KT.PACKED = self.frame
+        KT.FORM = self.frame
         # self.frame.grid()
         self.frame.parent = KT.APP
         # ^ But technically, KT.APP is the root widget's
