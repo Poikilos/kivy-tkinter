@@ -12,10 +12,11 @@ this project together.
 Kivy programs need no code changes to utilize kivy-tkinter! However,
 only so many features of Kivy are implemented. Known working Kivy
 apps include:
-- [IntroCompatiblizer](https://github.com/poikilos/IntroCompatiblizer)
 
-Before:
+### [IntroCompatiblizer](https://github.com/poikilos/IntroCompatiblizer)
+
+#### Before
 ![IntroCompatiblizer before](doc/images/IntroCompatiblizer-before.png)
 
-After:
+#### After
 ![IntroCompatiblizer after](doc/images/IntroCompatiblizer-after.png)
