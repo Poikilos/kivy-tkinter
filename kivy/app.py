@@ -68,8 +68,10 @@ class App(tk.Tk):
         here and now is likely not a Kivy-like way of doing things).
         '''
         KT.indent = ""
+        tabs = []
         prevIndent = None
         stack = []
+        # ^ stack.append doesn't occur until the end of this method.
         # print("I am a {}.".format(str(type(self).__name__)))
         frame = inspect.stack()[2]
         cfp = frame[0].f_code.co_filename
@@ -106,20 +108,28 @@ class App(tk.Tk):
             dent = line[:(len(line)-len(lineS))]
             # print("indent: \"{}\"".format(dent))
             if len(dent) < len(KT.indent):
-                if stack[-1].parent is None:
-                    raise SyntaxError(dent + "Line {} of {} has more"
-                                      " than one root widget near `{}`"
-                                      "".format(lineN, fn,
-                                                line.strip()))
-                if stack[-1].parent is not None:
-                    pass
-                    # add the widget AFTER setting all properties ?
-                    # stack[-1].parent.add_widget(stack[-1])
-                del stack[-1]
-                '''
-                print(dent + "Line {} of {} starts a new object"
-                      " near `{}`.".format(lineN, fn, line.strip()))
-                '''
+                while len("".join(tabs)) > len(dent):
+                    if stack[-1].parent is None:
+                        raise SyntaxError(dent + "Line {} of {} has more"
+                                          " than one root widget near `{}`"
+                                          "".format(lineN, fn,
+                                                    line.strip()))
+                    if stack[-1].parent is not None:
+                        pass
+                        # add the widget AFTER setting all properties ?
+                        # stack[-1].parent.add_widget(stack[-1])
+                    del stack[-1]
+                    del tabs[-1]
+                    '''
+                    print(dent + "Line {} of {} starts a new object"
+                          " near `{}`.".format(lineN, fn, line.strip()))
+                    '''
+                if len("".join(tabs)) != len(dent):
+                    raise SyntaxError(dent + "Line {} of {} doesn't"
+                          " match a previous indent near `{}`."
+                          " thisTabSize={}, dent='{}', tabs={}"
+                          "".format(lineN, fn, line.strip(),
+                                    thisTabSize, dent, tabs))
             KT.indent = dent
             kvc = Parser.parserStatement(lineS)
             deeperO = None
@@ -166,6 +176,12 @@ class App(tk.Tk):
                 # classes (regardless of kvc.rvalue.className presence):
                 if kvc.lvalue.value == "orientation":
                     stack[-1].orientation = kvc.rvalue.value
+                    '''
+                    print("[kivy-tkinter kivy app] set {} {}"
+                          " orientation to {}"
+                          "".format(type(stack[-1]).__name__,
+                                    stack[-1].id, kvc.rvalue.value))
+                    '''
                 elif kvc.lvalue.value == 'id':
                     # thisId = kvc.rvalue.value
                     stack[-1].id = kvc.rvalue.value
@@ -248,15 +264,6 @@ class App(tk.Tk):
                     # right: self.parent.right
                     # right: layout.right # where id of parent is layout
 
-
-
-
-
-
-
-
-
-
             if ThisClass is not None:
                 if len(stack) == 0:
                     deeperO = self.frame
@@ -278,6 +285,17 @@ class App(tk.Tk):
                     print(dent + "tkinterParent is {}"
                           "".format(stack[-1]))
                     '''
+                    msgFmt = (dent + "adding {}"
+                              " to {} {} with orientation {}.")
+                    print(
+                        msgFmt.format(
+                            kvc.lvalue.value,
+                            type(stack[-1]).__name__,
+                            stack[-1].id,
+                            stack[-1].orientation,
+                        )
+                    )
+
                     if not hasattr(stack[-1], 'add_widget'):
                         exFmt = (dent + "Line {} of {} has a `{}`"
                                  " inside of a `{}` near `{}`.")
@@ -291,6 +309,22 @@ class App(tk.Tk):
                 # if thisId is not None:
                 # self.frame.ids[thisId] = deeperO
                 stack.append(deeperO)
+            thisTabSize = len(dent) - len("".join(tabs))
+            '''
+            if thisTabSize < 1:
+                exFmt = (dent + "[kivy-tkinter app] failed to"
+                         " correctly add to the indent on line {} "
+                         " of {} near `{}`. This is a failure in"
+                         " kivy-tkinter itself. thisTabSize={},"
+                         " dent='{}', tabs={}")
+
+                raise RuntimeError(
+                    exFmt.format(lineN, fn, line.strip(),
+                                 thisTabSize, dent, tabs)
+                )
+            '''
+            if thisTabSize > 0:
+                tabs.append(dent[-thisTabSize:])
 
     def build(self):
         raise NotImplementedError("You must implement `build` and"

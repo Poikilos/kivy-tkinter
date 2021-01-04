@@ -27,7 +27,7 @@ class BoxLayout(ttk.Frame, Layout):
         # TODO: implement spacing, padding, children, orientation,
         # parent, size, pos
         self.gm = "grid"  # which Tkinter geometry manager to use
-        self.layoutI = 0
+        self._layoutI = 0
 
         self.orientation = kwargs.get("orientation", "horizontal")
         if "orientation" in kwargs:
@@ -70,13 +70,13 @@ class BoxLayout(ttk.Frame, Layout):
                   "".format(type(widget).__name__,
                             type(self).__name__))
             '''
-            widget.atI = self.layoutI
+            widget.atI = self._layoutI
             try:
                 if self.orientation == "horizontal":
-                    widget.grid(column=self.layoutI, row=0,
+                    widget.grid(column=self._layoutI, row=0,
                                 sticky=tk.N+tk.S)
                 elif self.orientation == "vertical":
-                    widget.grid(column=0, row=self.layoutI,
+                    widget.grid(column=0, row=self._layoutI,
                                 sticky=tk.W+tk.E)
                 else:
                     raise ValueError(
@@ -99,7 +99,7 @@ class BoxLayout(ttk.Frame, Layout):
                                    " grid but kivy-tkinter failed to"
                                    " ensure that (Tkinter says: {}"
                                    ").".format(ex))
-            self.layoutI += 1
+            self._layoutI += 1
         else:
             raise ValueError("A Tkinter geometry manager named {} is"
                              " not implemented.".format(self.gm))
