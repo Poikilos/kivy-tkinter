@@ -9,6 +9,8 @@ except ImportError:  # Python 2
     import tkFont
     import ttk
 
+from kivy.kivytkinter import warn
+
 
 class DictProperty:
 
@@ -46,6 +48,7 @@ class ListProperty:
     '''
 
     def __init__(self, *args):
+        self._silent = False
         self._l = []
         self._d = {}
         self._defaultAs = 'list'
@@ -81,6 +84,11 @@ class ListProperty:
             for i in range(len(value)):
                 self._d[i] = value[i]
 
+    def __str__(self):
+        if self._defaultAs == 'dict':
+            return str(self._d)
+        return str(self._l)
+
     def __getitem__(self, key):
         if self._defaultAs == 'dict':
             return self._d[key]
@@ -103,8 +111,38 @@ class ListProperty:
             if self._defaultAs == 'list':
                 raise ex
 
+    def get(self, key):
+        return self._d.get(key)
+
     def items(self):
         return self._d.items()
+
+    def keys(self):
+        return self._d.keys()
+
+    def popitem(self):
+        result = self._d.popitem()
+        if self._defaultAs == 'list':
+            warn("The ListProperty was used as a list but dict-like"
+                 " popitem was used (will get '{}')".format(result))
+        return result
+
+    def setdefault(self, key, *args):
+        default = None
+        if len(args) > 0:
+            default = args[0]
+        self.insert(key, default)
+
+    def update(self, *args):
+        if len(args) > 0:
+            prevSilent = self._silent
+            self._silent = True
+            for k,v in args[0].items():
+                self.insert(k, v)
+            self._silent = prevSilent
+
+    def values(self):
+        return self._d.values()
 
     def append(self, item):
         self._l.append(item)
@@ -115,10 +153,31 @@ class ListProperty:
             self.append(item)
 
     def insert(self, i, x):
-        for di in reversed(range(i+1, len(self._l))):
-            # TODO: Test this.
-            self._d[di+1] = self._d[di]
-        self._l.insert(i, x)
+        try:
+            for di in reversed(range(i, len(self._l))):
+                self._d[di+1] = self._d[di]
+        except TypeError as ex:
+            # 'str' object cannot be interpreted as an integer
+            warn("A ListProperty was used as a list then a dict.")
+        try:
+            self._l.insert(i, x)
+        except TypeError as ex:
+            # 'str' object cannot be interpreted as an integer
+            if self._defaultAs == 'list':
+                ok = False
+                try:
+                    index = int(i)
+                    self._l.insert(index, x)
+                    ok = True
+                except ValueError:
+                    pass
+                if not self._silent:
+                    suffix = " (succeeded as int)"
+                    if not ok:
+                        suffix = " (int() failed)"
+                    warn("ListProperty was used as a list but there was"
+                         " an attempt to insert at '{}' {}"
+                         "".format(i, suffix))
         self._d[i] = x
 
 
@@ -133,8 +192,17 @@ class ListProperty:
 
     def pop(self, *args):
         if len(args) == 1:
-            result = self._l.pop(args[0])
-            del self._d[args[0]]
+            result = None
+            if self._defaultAs == 'list':
+                result = self._l.pop(args[0])
+                del self._d[args[0]]
+            else:
+                result = self._d.pop(args[0])
+                try:
+                    self._l.pop(args[0])
+                except TypeError:
+                    # ^ list.pop only accepts an int
+                    pass
             return result
         elif len(args) > 1:
             raise ValueError("Only 0-1 arguments are implemented for"
@@ -174,7 +242,12 @@ class ListProperty:
         self._l.reverse()
 
     def copy(self):
-        return self._l.copy()
+        lp = None
+        if self._defaultAs == 'dict':
+            lp = ListProperty(self._d)
+        else:
+            lp = ListProperty(self._l)
+        return lp
 
 
 class NumericProperty:
