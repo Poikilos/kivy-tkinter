@@ -34,8 +34,6 @@ from kivy.uix.textinput import TextInput
 
 class App(tk.Tk):
     IS_TKINTER = True
-    KT.MIN_W = 400
-    KT.MIN_H = 300
 
     def __init__(self):
         tk.Tk.__init__(self)
