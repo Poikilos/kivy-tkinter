@@ -15,7 +15,7 @@ apps include:
 - [IntroCompatiblizer](https://github.com/poikilos/IntroCompatiblizer)
 
 Before:
-![IntroCompatiblizer before](docs/images/IntroCompatiblizer-before.png)
+![IntroCompatiblizer before](doc/images/IntroCompatiblizer-before.png)
 
 After:
-![IntroCompatiblizer after](docs/images/IntroCompatiblizer-after.png)
+![IntroCompatiblizer after](doc/images/IntroCompatiblizer-after.png)
