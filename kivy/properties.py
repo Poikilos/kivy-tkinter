@@ -12,21 +12,6 @@ except ImportError:  # Python 2
 from kivy.kivytkinter import warn
 
 
-class DictProperty:
-
-    def __init__(self, *args):
-        if len(args) == 1:
-            for k,v in args[0].items():
-                self[k] = v
-        elif len(args) > 1:
-            raise ValueError("Only 0-1 arguments are implemented for"
-                             " {}.".format(type(self).__name__))
-
-    def __setitem__(self, key, item):
-        self.__dict__[key] = item
-
-    def __getitem__(self, key):
-        return self.__dict__[key]
 
 class ListPropertyIterator:
     def __init__(self, lp):
@@ -35,9 +20,9 @@ class ListPropertyIterator:
 
     def __next__(self):
         if self._index < len(self._lp._l):
-           result = self._lp._l[self._index]
-           self._index += 1
-           return result
+            result = self._lp._l[self._index]
+            self._index += 1
+            return result
         raise StopIteration
 
 
@@ -249,6 +234,43 @@ class ListProperty:
             lp = ListProperty(self._l)
         return lp
 
+
+class DictPropertyIterator:
+    def __init__(self, dp):
+        self._dp = dp
+        self._keys = dp.keys()
+        self._index = 0
+
+    def __next__(self):
+        if self._index < len(self._keys):
+            key = self._keys[self._index]
+            result = (key, self._dp[key])
+            self._index += 1
+            return result
+        raise StopIteration
+
+
+class DictProperty(ListProperty):
+
+    def __iter__(self):
+        return DictPropertyIterator(self)
+
+'''
+    def __init__(self, *args):
+        if len(args) == 1:
+            for k,v in args[0].items():
+                self[k] = v
+        elif len(args) > 1:
+            raise ValueError("Only 0-1 arguments are implemented for"
+                             " {}.".format(type(self).__name__))
+
+    def __setitem__(self, key, item):
+        self.__dict__[key] = item
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+'''
 
 class NumericProperty:
     def __init__(self, *args):

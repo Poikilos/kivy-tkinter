@@ -272,7 +272,7 @@ class App(tk.Tk):
                              " that will be taken literally: `{}` near"
                              " `{}`".format(lineN, fn, kvc.rvalue,
                                             line.strip()))
-                    stack[-1].__dict__[key] = value
+                    # stack[-1].__dict__[key] = value
                     # ^ Using dict overwrites a property with a plain
                     # variable!
                     setattr(stack[-1], key, value)

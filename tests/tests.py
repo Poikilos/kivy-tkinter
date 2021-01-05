@@ -7,7 +7,7 @@ from inspect import getmembers, isfunction
 if os.path.isfile("../kivy/properties.py"):
     sys.path.append("..")
 
-from kivy.properties import ListProperty
+from kivy.properties import (ListProperty, DictProperty)
 
 d = {
     '0': 'a',
@@ -17,11 +17,23 @@ d = {
 d2 = {
     '2': 'c',
 }
+resultD = {
+    '0': 'a',
+    '1': 'b',
+    '2': 'c',
+    '3': 'd',
+}
 intD = {}
 
 l = ['a', 'b', 'd']
 for i in range(len(l)):
     intD[i] = l[i]
+
+resultIntD = {}
+
+resultL = ['a', 'b', 'c', 'd']
+for i in range(len(l)):
+    resultIntD[i] = resultL[i]
 
 
 def test_ListProperty_as_list():
@@ -31,6 +43,7 @@ def test_ListProperty_as_list():
     sys.stdout.write("{} becomes ".format(lp))
     lp.insert(2, 'c')
     print("{}".format(lp))
+    assert lp._l == resultL
 
 
 def test_ListProperty_as_list_then_dict():
@@ -40,6 +53,7 @@ def test_ListProperty_as_list_then_dict():
     print("BEFORE: {}".format(lp))
     lp.insert('2', 'c')
     print("AFTER: {}".format(lp))
+    assert lp._l == resultL
 
 
 def test_ListProperty_as_dict_then_list():
@@ -49,6 +63,12 @@ def test_ListProperty_as_dict_then_list():
     print("BEFORE: {}".format(lp))
     lp.insert('2', 'c')
     print("AFTER: {}".format(lp))
+    assert lp._d == {0: 'a', 1: 'b', 2: 'd', '2': 'c'}
+    # ^ ok since order doesn't matter
+    # (It won't have the same indices as resultIntD since resultIntD's
+    # indices are all ints--What is more important is that if lp was
+    # initialized as a dict, then lp should not convert the indices to
+    # ints.)
 
 
 def test_ListProperty_as_dict():
@@ -57,11 +77,39 @@ def test_ListProperty_as_dict():
     dict in Tkinter.
     '''
     print()
-    print("Test ListProperty as dict ({})".format(test_ListProperty_as_dict.__doc__.strip()))
+    print("Test ListProperty as dict ({}):"
+          "".format(test_ListProperty_as_dict.__doc__.strip()))
     lp = ListProperty(intD.copy())
     sys.stdout.write("{} becomes ".format(lp))
     lp.insert(2, 'c')
     print("{}".format(lp))
+    assert lp._d == {0: 'a', 1: 'b', 2: 'c', 3: 'd'}
+    # ^ ok since order doesn't matter
+    # (It won't have the same indices as resultD)
+    # - but indices should be converted to ints since whoever created
+    # the list expects that. That would break things in Tkinter but the
+    # list is manually recreated as a dict to avoid this behavior (All
+    # subclasses of Tkinter widgets should ensure that
+    # ListProperty(self.children) is called AFTER calling super in init,
+    # since Tkinter remakes children as a dict).
+
+
+def test_DictPropertyIterator():
+    dp = DictProperty(resultD.copy())
+    print()
+    print("test_DictPropertyIterator:")
+    print("  keys:")
+    for k in dp.keys():
+        print("    - {}".format(k))
+    print("  values:")
+    for v in dp.values():
+        print("    - {}".format(k, v))
+    print("  pairs:")
+    for k,v in dp.items():
+        print("    {}: {}".format(k, v))
+    c =  dict(zip(dp.keys(), dp.values()))
+    assert c == resultD
+
 
 
 def main():
