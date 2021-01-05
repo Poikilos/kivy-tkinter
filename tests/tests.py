@@ -94,21 +94,32 @@ def test_ListProperty_as_dict():
     # since Tkinter remakes children as a dict).
 
 
-def test_DictPropertyIterator():
+def test_DictProperty_keys_and_values():
     dp = DictProperty(resultD.copy())
     print()
-    print("test_DictPropertyIterator:")
+    print("test_DictProperty_keys_and_values:")
     print("  keys:")
     for k in dp.keys():
         print("    - {}".format(k))
     print("  values:")
     for v in dp.values():
         print("    - {}".format(k, v))
+    zip1 =  dict(zip(dp.keys(), dp.values()))
+    assert zip1 == resultD
+
+def test_DictPropertyIterator():
+    dp = DictProperty(resultD.copy())
+    print()
+    print("test_DictPropertyIterator:")
     print("  pairs:")
+    keys = []
+    values = []
     for k,v in dp.items():
+        keys.append(k)
+        values.append(v)
         print("    {}: {}".format(k, v))
-    c =  dict(zip(dp.keys(), dp.values()))
-    assert c == resultD
+    zip2 =  dict(zip(keys, values))
+    assert zip2 == resultD
 
 
 
