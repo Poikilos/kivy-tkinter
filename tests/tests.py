@@ -128,6 +128,9 @@ def main():
     for fn in [o for o in getmembers(mod) if isfunction(o[1])]:
         if fn[0].startswith("test_"):
             fn[1]()
+    print()
+    print("All tests passed.")
+    # ^ otherwise an assertion failed exception would have happened.
 
 
 if __name__ == "__main__":
