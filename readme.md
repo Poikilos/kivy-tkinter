@@ -5,8 +5,54 @@ Use Tkinter using the Kivy coding style and the declarative KV language
 with no changes to your Kivy project's code (If it doesn't run, this
 project should change rather than your code--see "Development").
 
-Only some simple widgets are implemented so far.
+## Why?
 
+Kivy is useful for deploying to desktops, but doing so requires a
+virtualenv or a Python-to-binary tool. Upgrading to the next major
+release of your distro usually breaks the virtualenv. Utilizing kivy-tkinter, the
+problem goes away as no virtualenv nor compilation is necessary. It uses its own
+subclasses of tkinter widgets. Note that only a subset of Kivy widgets
+are implemented so far.
+
+It is tkinter using kivy coding style and KV.
+
+@tshirtman asks (Kivy discord channel #your-projects 2021-01-04), "did
+you have a look at enaml-native? it's kind of like kvlang (though the
+language seems a bit more noisy/messy to me), using native widgets, i
+never tried it, though"
+
+My main aim in this case is to provide a new "target" for Kivy apps
+with no code change (See "Examples"). I may expand it when I run into
+another one of my Kivy apps with the same situation, where I want
+lightweight and platform-agnostic distribution and don't need advanced
+graphical features of Kivy (Though kivy-tkinter could wrap those
+features later).
+
+The kivy-tkinter "target" for Kivy provides exceptional speed and
+utilizes native or native-style widgets to the extent that Tkinter does.
+
+Launch times for IntroCompatiblizer using 1 TB WD Black HDD (WD1003FZEX):
+- Kivy
+  - 1st launch: ~8s
+  - 2nd launch: ~2s
+- kivy-tkinter:
+  - 1st launch ~3s
+  - 2nd launch ~1s
+
+(Times are approximate.) That difference is expected, because it
+doesn't load any multimedia support, nor load a custom widget system.
+
+
+## KivyMD Status
+No project like kivymd-tkinter exists yet, but that is the recommended
+approach.
+
+Since KivyMD customizes widgets heavily, the most elegant (though not
+actually "material design" (MD) unless the Tkinter theme is so)
+solution for KivyMD compatibility is to create a kivymd-tkinter project
+that subclasses kivy-tkinter widgets. For example, utilizing ttk's
+Notebook for KivyMD tabs (or Kivy Carousel) is closer to the goals of
+this project than implementing low-level widget drawing and gestures.
 
 ## Usage
 Link or copy the kivy-tkinter/kivy directory into your app.
